@@ -1,13 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components/native';
 import { theme } from './theme';
-import { StatusBar, Dimensions, Alert } from 'react-native';
+import { StatusBar, Dimensions } from 'react-native';
 import Input from './components/Input';
 import Task from './components/Task';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppLoading from 'expo-app-loading';
 import Button from './components/Button';
-import LineButton from './components/Line';
+
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -34,11 +34,13 @@ const List = styled.ScrollView`
   width: ${({ width }) => width - 40}px;
 `;
 
+
 export default function App() {
   const width = Dimensions.get('window').width;
   const [isReady, setIsReady] = useState(false);
-  const [newTask, setNewTask] = useState('');
+  const [newTask, setNewTask] = useState(''); 
   const [tasks, setTasks] = useState({});
+
 
   //로걸저장소에 데이터 저장하기
   const storeData = async (key, value) => {
@@ -55,30 +57,31 @@ export default function App() {
   const getData = async (key) => {
     try {
       const jsonValue = await AsyncStorage.getItem(key);
-      const tasks = jsonValue != null ? JSON.parse(jsonValue) : {};
-      setTasks(tasks);
+       const tasks = jsonValue != null ? JSON.parse(jsonValue) : {};
+       setTasks(tasks);
     } catch (e) {
       // error reading value
     }
   };
 
   //로컬저장소 삭제
-  const removeValue = async (key) => {
-    try {
+  const removeValue = async(key)=>{
+    try{
       await AsyncStorage.removeItem(key);
-    } catch (e) {
+    }catch (e){
       //error reading
     }
-  };
+  }
 
   //전체삭제
-  const clearAll = async () => {
-    try {
+  const clearAll=async()=>{
+    try{
       await AsyncStorage.clear();
-    } catch (e) {
+    }catch (e){
       //error reading
     }
-  };
+  }
+
 
   //추가
   const _addTask = () => {
@@ -99,6 +102,7 @@ export default function App() {
     storeData('tasks', currentTasks); //로컬저장소에 저장
   };
 
+  
   //완료
   const _toggleTask = (id) => {
     const currentTasks = { ...tasks }; //객체복사
@@ -114,32 +118,6 @@ export default function App() {
     // setTasks(currentTasks);
     storeData('tasks', currentTasks); //로컬저장소에 저장
   };
-  //완료항목 전체 삭제
-  const _delAllTask = () => {
-    const currentTasks = { ...tasks };
-
-    //완료항목 없는경우
-    const completedTasks = Object.entries(currentTasks).filter(
-      (task) => task[1].checked == true
-    );
-//확인창 띄우지 않음.
-    if (completedTasks.length < 1) return;
-
-    const deleteCompletedItems = () => {
-      const filteredTasks = Object.fromEntries(
-        Object.entries(currentTasks).filter((task) => task[1].checked == false)
-      );
-      storeData('tasks', filteredTasks);
-    };
-
-    Alert.alert('삭제', '완료항목 전체를 삭제하시겠습니까?', [
-      {
-        text: '예',
-        onPress: () => deleteCompletedItems(),
-      },
-      { text: '아니오', onPress: () => {} },
-    ]);
-  };
 
   // 포커스
   const _onBlur = () => {
@@ -153,9 +131,7 @@ export default function App() {
   return !isReady ? (
     <AppLoading
       // 앱로딩전 실행할 로직
-      startAsync={() => {
-        getData('tasks');
-      }}
+      startAsync={()=>{getData('tasks')}}
       onFinish={() => setIsReady(true)}
       onError={console.warn}
     />
@@ -187,7 +163,6 @@ export default function App() {
               />
             ))}
         </List>
-        <LineButton text="완료항목 전체삭제" onPressOut={_delAllTask} />
         {/* <Button/> */}
       </Container>
     </ThemeProvider>
